@@ -28,31 +28,40 @@
       word-break: break-all;
       color: #333;
     }
+    .error {
+      color: #b71c1c;
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>Join Space</h1>
   <div id="qrcode"></div>
   <div class="link" id="deeplink"></div>
+  <div class="error" id="error"></div>
 
   <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    const inviteCode = "123456";
-    const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
-    
-    // Show text link on page
-    document.getElementById("deeplink").textContent = deeplink;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-    // Generate QR Code
-    new QRCode(document.getElementById("qrcode"), {
-      text: deeplink,
-      width: 256,
-      height: 256,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
-    });
+    if (!code) {
+      document.getElementById("error").textContent = "❌ No invite code found in URL.";
+    } else {
+      const deeplink = `accessability://open/joinspace?code=${code}`;
+      document.getElementById("deeplink").textContent = deeplink;
+
+      new QRCode(document.getElementById("qrcode"), {
+        text: deeplink,
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
   </script>
 </body>
 </html>
