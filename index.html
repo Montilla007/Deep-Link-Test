@@ -28,10 +28,7 @@
       const code = params.get("code");
 
       // Build deep link
-      let deepLink = "accessability://open/joinspace";
-      if (code) {
-        deepLink += "?code=" + encodeURIComponent(code);
-      }
+      let deepLink = "accessability://open/joinspace?code=123456";
 
       // Trigger the deep link immediately
       window.location = deepLink;
