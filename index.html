@@ -72,7 +72,7 @@
   <div id="storageStatus" class="status"></div>
 
   <button id="btnChangeCode">✏️ Change Code</button>
-  <button id="btnShuffleCode">🎲 Shuffle Code</button>
+  <button id="btnShuffleCode">🎲 Shuffle Code (Numbers)</button>
   <button id="btnOpenApp">🚀 Open App via Deep Link</button>
   <button id="btnDownload">⬇️ Download APK</button>
 
@@ -85,7 +85,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    // --- CONFIG ---
     let inviteCode = "123456";
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
@@ -103,7 +102,6 @@
       const finalUrl = getCurrentUrlWithCode();
       pagelinkEl.textContent = finalUrl;
 
-      // Clear and regenerate QR
       qrcodeEl.innerHTML = "";
       new QRCode(qrcodeEl, {
         text: finalUrl,
@@ -118,16 +116,14 @@
       storageStatusEl.className = "status success";
     }
 
-    function generateRandomCode(length = 6) {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    function generateRandomNumberCode(length = 6) {
       let result = "";
       for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        result += Math.floor(Math.random() * 10); // digits only
       }
       return result;
     }
 
-    // --- BUTTON HANDLERS ---
     document.getElementById("btnChangeCode").onclick = () => {
       const newCode = prompt("Enter a new invite code:", inviteCode);
       if (newCode && newCode.trim() !== "") {
@@ -137,8 +133,8 @@
     };
 
     document.getElementById("btnShuffleCode").onclick = () => {
-      inviteCode = generateRandomCode(6); // generate a random alphanumeric code
-      console.log("🎲 Shuffled code:", inviteCode);
+      inviteCode = generateRandomNumberCode(6);
+      console.log("🎲 Shuffled numeric code:", inviteCode);
       render();
     };
 
@@ -153,7 +149,6 @@
       window.location = apkDownload;
     };
 
-    // --- INITIALIZE ---
     render();
   </script>
 </body>
