@@ -38,14 +38,10 @@
       font-size: 0.9rem;
       font-weight: bold;
     }
-    .status.success {
-      color: green;
-    }
-    .status.fail {
-      color: red;
-    }
+    .status.success { color: green; }
+    .status.fail { color: red; }
     button {
-      margin: 8px;
+      margin: 6px;
       padding: 10px 20px;
       font-size: 1rem;
       border: none;
@@ -54,9 +50,7 @@
       color: white;
       cursor: pointer;
     }
-    button:hover {
-      background: #0056b3;
-    }
+    button:hover { background: #0056b3; }
     button.danger {
       background: #dc3545;
     }
@@ -72,7 +66,9 @@
   <div id="storageStatus" class="status"></div>
 
   <button id="btnChangeCode">✏️ Change Code</button>
-  <button id="btnShuffleCode">🎲 Shuffle Code (Numbers)</button>
+  <button id="btnShuffleCode">🎲 Shuffle Code</button>
+  <button id="btnStore">💾 Save to LocalStorage</button>
+  <button id="btnClear" class="danger" style="display:none;">🗑️ Clear LocalStorage</button>
   <button id="btnOpenApp">🚀 Open App via Deep Link</button>
   <button id="btnDownload">⬇️ Download APK</button>
 
@@ -91,11 +87,32 @@
     const pagelinkEl = document.getElementById("pagelink");
     const storageStatusEl = document.getElementById("storageStatus");
     const qrcodeEl = document.getElementById("qrcode");
+    const btnStore = document.getElementById("btnStore");
+    const btnClear = document.getElementById("btnClear");
 
     function getCurrentUrlWithCode() {
       const url = new URL(window.location.href);
       url.searchParams.set("code", inviteCode);
       return url.toString();
+    }
+
+    function generateDeepLink() {
+      return `accessability://open/joinspace?code=${inviteCode}`;
+    }
+
+    function updateStorageStatus() {
+      const stored = localStorage.getItem("pending_deeplink");
+      if (stored) {
+        storageStatusEl.textContent = `✅ Stored in localStorage: ${stored}`;
+        storageStatusEl.className = "status success";
+        btnStore.style.display = "none";
+        btnClear.style.display = "inline-block";
+      } else {
+        storageStatusEl.textContent = "ℹ️ Nothing stored in localStorage.";
+        storageStatusEl.className = "status fail";
+        btnStore.style.display = "inline-block";
+        btnClear.style.display = "none";
+      }
     }
 
     function render() {
@@ -112,14 +129,13 @@
         correctLevel: QRCode.CorrectLevel.H
       });
 
-      storageStatusEl.textContent = `ℹ️ QR generated with code: ${inviteCode}`;
-      storageStatusEl.className = "status success";
+      updateStorageStatus();
     }
 
     function generateRandomNumberCode(length = 6) {
       let result = "";
       for (let i = 0; i < length; i++) {
-        result += Math.floor(Math.random() * 10); // digits only
+        result += Math.floor(Math.random() * 10);
       }
       return result;
     }
@@ -138,8 +154,21 @@
       render();
     };
 
+    btnStore.onclick = () => {
+      const deeplink = generateDeepLink();
+      localStorage.setItem("pending_deeplink", deeplink);
+      console.log("💾 Stored deep link:", deeplink);
+      updateStorageStatus();
+    };
+
+    btnClear.onclick = () => {
+      localStorage.removeItem("pending_deeplink");
+      console.log("🗑️ Cleared deep link from localStorage");
+      updateStorageStatus();
+    };
+
     document.getElementById("btnOpenApp").onclick = () => {
-      const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
+      const deeplink = generateDeepLink();
       console.log("🚀 Opening app via deep link:", deeplink);
       window.location = deeplink;
     };
