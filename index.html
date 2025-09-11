@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Join Space</title>
+  <title>Join Space - Test Mode</title>
   <style>
     body {
       display: flex;
@@ -44,18 +44,45 @@
     .status.fail {
       color: red;
     }
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button.danger {
+      background: #dc3545;
+    }
+    button.danger:hover {
+      background: #a71d2a;
+    }
   </style>
 </head>
 <body>
-  <h1>Join Space</h1>
-  <div id="qrcode"></div>
+  <h1>Join Space (Test Page)</h1>
+
   <div class="link" id="pagelink"></div>
   <div id="storageStatus" class="status"></div>
+
+  <button id="btnStore">💾 Store Deep Link</button>
+  <button id="btnDelete" class="danger" style="display:none;">🗑️ Delete Deep Link</button>
+  <button id="btnOpenApp">🚀 Open App via Deep Link</button>
+  <button id="btnDownload">⬇️ Download APK</button>
+
+  <div id="qrcode"></div>
+
   <div class="notice">
-    If you don't have the app installed, you'll be redirected to download it.
+    This is TEST MODE — nothing happens automatically.<br>
+    Use the buttons above to manually trigger actions.
   </div>
 
-  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     // --- CONFIG ---
@@ -64,23 +91,14 @@
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
     const storageStatusEl = document.getElementById("storageStatus");
+    const btnStore = document.getElementById("btnStore");
+    const btnDelete = document.getElementById("btnDelete");
 
-    // --- STORE FOR LATER (for deferred deep linking) ---
-    try {
-      localStorage.setItem("pending_deeplink", deeplink);
-      console.log("✅ Stored deep link in localStorage:", deeplink);
-      storageStatusEl.textContent = "✅ Invite link stored in your device";
-      storageStatusEl.classList.add("success");
-    } catch (e) {
-      console.warn("⚠️ Could not save to localStorage:", e);
-      storageStatusEl.textContent = "❌ Could not save invite link. Please check your browser settings.";
-      storageStatusEl.classList.add("fail");
-    }
-
-    // --- GENERATE QR FOR THIS PAGE ---
+    // Display current page link
     const currentPageUrl = window.location.href;
     document.getElementById("pagelink").textContent = currentPageUrl;
 
+    // Generate QR code for sharing
     new QRCode(document.getElementById("qrcode"), {
       text: currentPageUrl,
       width: 256,
@@ -90,19 +108,47 @@
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // --- ATTEMPT OPEN APP ---
-    function openApp() {
-      // Try to open the app
-      window.location = deeplink;
-
-      // If the app isn't installed, go to APK download after 1.5 sec
-      setTimeout(() => {
-        window.location = apkDownload;
-      }, 1500);
+    // --- FUNCTIONS ---
+    function updateStorageStatus() {
+      const stored = localStorage.getItem("pending_deeplink");
+      if (stored) {
+        storageStatusEl.textContent = "✅ Stored deep link: " + stored;
+        storageStatusEl.className = "status success";
+        btnStore.style.display = "none";
+        btnDelete.style.display = "inline-block";
+      } else {
+        storageStatusEl.textContent = "ℹ️ No deep link stored.";
+        storageStatusEl.className = "status fail";
+        btnStore.style.display = "inline-block";
+        btnDelete.style.display = "none";
+      }
     }
 
-    // Kick it off
-    openApp();
+    // --- BUTTON HANDLERS ---
+    btnStore.onclick = () => {
+      localStorage.setItem("pending_deeplink", deeplink);
+      console.log("✅ Stored deep link:", deeplink);
+      updateStorageStatus();
+    };
+
+    btnDelete.onclick = () => {
+      localStorage.removeItem("pending_deeplink");
+      console.log("🗑️ Deleted deep link from localStorage.");
+      updateStorageStatus();
+    };
+
+    document.getElementById("btnOpenApp").onclick = () => {
+      console.log("🚀 Opening app via deep link:", deeplink);
+      window.location = deeplink;
+    };
+
+    document.getElementById("btnDownload").onclick = () => {
+      console.log("⬇️ Downloading APK:", apkDownload);
+      window.location = apkDownload;
+    };
+
+    // --- INITIALIZE ---
+    updateStorageStatus();
   </script>
 </body>
 </html>
