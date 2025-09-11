@@ -38,7 +38,7 @@
 <body>
   <h1>Join Space</h1>
   <div id="qrcode"></div>
-  <div class="link" id="deeplink"></div>
+  <div class="link" id="pagelink"></div>
   <div class="notice">
     If you don't have the app installed, you'll be redirected to download it.
   </div>
@@ -47,7 +47,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     // --- CONFIG ---
-    const inviteCode = "123456"; // dynamic in real use
+    const inviteCode = "123456"; // dynamically generated in real usage
     const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
@@ -59,12 +59,12 @@
       console.warn("⚠️ Could not save to localStorage:", e);
     }
 
-    // --- DISPLAY ON PAGE ---
-    document.getElementById("deeplink").textContent = deeplink;
+    // --- GENERATE QR FOR THIS PAGE ---
+    const currentPageUrl = window.location.href;
+    document.getElementById("pagelink").textContent = currentPageUrl;
 
-    // --- GENERATE QR ---
     new QRCode(document.getElementById("qrcode"), {
-      text: deeplink,
+      text: currentPageUrl,
       width: 256,
       height: 256,
       colorDark: "#000000",
