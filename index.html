@@ -71,8 +71,8 @@
   <div class="link" id="pagelink"></div>
   <div id="storageStatus" class="status"></div>
 
-  <button id="btnStore">💾 Store Deep Link</button>
-  <button id="btnDelete" class="danger" style="display:none;">🗑️ Delete Deep Link</button>
+  <button id="btnChangeCode">✏️ Change Code</button>
+  <button id="btnShuffleCode">🎲 Shuffle Code</button>
   <button id="btnOpenApp">🚀 Open App via Deep Link</button>
   <button id="btnDownload">⬇️ Download APK</button>
 
@@ -86,58 +86,64 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     // --- CONFIG ---
-    const inviteCode = "123456"; // dynamically generated in real usage
-    const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
+    let inviteCode = "123456";
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
+    const pagelinkEl = document.getElementById("pagelink");
     const storageStatusEl = document.getElementById("storageStatus");
-    const btnStore = document.getElementById("btnStore");
-    const btnDelete = document.getElementById("btnDelete");
+    const qrcodeEl = document.getElementById("qrcode");
 
-    // Display current page link
-    const currentPageUrl = window.location.href;
-    document.getElementById("pagelink").textContent = currentPageUrl;
+    function getCurrentUrlWithCode() {
+      const url = new URL(window.location.href);
+      url.searchParams.set("code", inviteCode);
+      return url.toString();
+    }
 
-    // Generate QR code for sharing
-    new QRCode(document.getElementById("qrcode"), {
-      text: currentPageUrl,
-      width: 256,
-      height: 256,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
-    });
+    function render() {
+      const finalUrl = getCurrentUrlWithCode();
+      pagelinkEl.textContent = finalUrl;
 
-    // --- FUNCTIONS ---
-    function updateStorageStatus() {
-      const stored = localStorage.getItem("pending_deeplink");
-      if (stored) {
-        storageStatusEl.textContent = "✅ Stored deep link: " + stored;
-        storageStatusEl.className = "status success";
-        btnStore.style.display = "none";
-        btnDelete.style.display = "inline-block";
-      } else {
-        storageStatusEl.textContent = "ℹ️ No deep link stored.";
-        storageStatusEl.className = "status fail";
-        btnStore.style.display = "inline-block";
-        btnDelete.style.display = "none";
+      // Clear and regenerate QR
+      qrcodeEl.innerHTML = "";
+      new QRCode(qrcodeEl, {
+        text: finalUrl,
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      storageStatusEl.textContent = `ℹ️ QR generated with code: ${inviteCode}`;
+      storageStatusEl.className = "status success";
+    }
+
+    function generateRandomCode(length = 6) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
+      return result;
     }
 
     // --- BUTTON HANDLERS ---
-    btnStore.onclick = () => {
-      localStorage.setItem("pending_deeplink", deeplink);
-      console.log("✅ Stored deep link:", deeplink);
-      updateStorageStatus();
+    document.getElementById("btnChangeCode").onclick = () => {
+      const newCode = prompt("Enter a new invite code:", inviteCode);
+      if (newCode && newCode.trim() !== "") {
+        inviteCode = newCode.trim();
+        render();
+      }
     };
 
-    btnDelete.onclick = () => {
-      localStorage.removeItem("pending_deeplink");
-      console.log("🗑️ Deleted deep link from localStorage.");
-      updateStorageStatus();
+    document.getElementById("btnShuffleCode").onclick = () => {
+      inviteCode = generateRandomCode(6); // generate a random alphanumeric code
+      console.log("🎲 Shuffled code:", inviteCode);
+      render();
     };
 
     document.getElementById("btnOpenApp").onclick = () => {
+      const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
       console.log("🚀 Opening app via deep link:", deeplink);
       window.location = deeplink;
     };
@@ -148,7 +154,7 @@
     };
 
     // --- INITIALIZE ---
-    updateStorageStatus();
+    render();
   </script>
 </body>
 </html>
