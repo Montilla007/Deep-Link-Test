@@ -3,62 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open App</title>
+  <title>Join Space</title>
   <style>
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       font-family: sans-serif;
       margin: 0;
-      background-color: #f9f9f9;
+      background-color: #f0f0f0;
       text-align: center;
     }
-    .download-btn {
-      display: inline-block;
+    #qrcode {
       margin-top: 20px;
-      padding: 12px 24px;
-      background: #6750A4;
-      color: white;
-      text-decoration: none;
+      background: white;
+      padding: 10px;
       border-radius: 8px;
-      font-weight: bold;
+    }
+    .link {
+      margin-top: 15px;
+      font-size: 1rem;
+      word-break: break-all;
+      color: #333;
+    }
+    .notice {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: #666;
     }
   </style>
-  <script>
-    window.onload = function() {
-      const start = Date.now();
-
-      // Get code from query params
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      // Build deep link
-      let deepLink = "accessability://open/joinspace";
-      if (code) {
-        deepLink += "?code=" + encodeURIComponent(code);
-      }
-
-      // Try to open the app
-      window.location = deepLink;
-
-      // Fallback: if app not installed, redirect to APK after 1.5s
-      setTimeout(() => {
-        if (Date.now() - start >= 1500) {
-          window.location = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
-        }
-      }, 1500);
-    };
-  </script>
 </head>
 <body>
-  <div>
-    <h1>Opening App...</h1>
-    <p>If the app does not open automatically, you can download it manually:</p>
-    <a href="https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk" class="download-btn">
-      Download APK
-    </a>
+  <h1>Join Space</h1>
+  <div id="qrcode"></div>
+  <div class="link" id="deeplink"></div>
+  <div class="notice">
+    If you don't have the app installed, you'll be redirected to download it.
   </div>
+
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // --- CONFIG ---
+    const inviteCode = "123456"; // dynamic in real use
+    const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
+    const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
+
+    // --- STORE FOR LATER (for deferred deep linking) ---
+    try {
+      localStorage.setItem("pending_deeplink", deeplink);
+      console.log("✅ Stored deep link in localStorage:", deeplink);
+    } catch (e) {
+      console.warn("⚠️ Could not save to localStorage:", e);
+    }
+
+    // --- DISPLAY ON PAGE ---
+    document.getElementById("deeplink").textContent = deeplink;
+
+    // --- GENERATE QR ---
+    new QRCode(document.getElementById("qrcode"), {
+      text: deeplink,
+      width: 256,
+      height: 256,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // --- ATTEMPT OPEN APP ---
+    function openApp() {
+      // Try to open the app
+      window.location = deeplink;
+
+      // If the app isn't installed, go to APK download after 1.5 sec
+      setTimeout(() => {
+        window.location = apkDownload;
+      }, 1500);
+    }
+
+    // Kick it off
+    openApp();
+  </script>
 </body>
 </html>
