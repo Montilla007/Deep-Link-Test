@@ -81,6 +81,38 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
+    // WebView detection and data passing
+    function isFlutterWebView() {
+      return window.flutter_inappwebview || 
+             navigator.userAgent.includes('Flutter') ||
+             /; wv\)/.test(navigator.userAgent); // Android WebView pattern
+    }
+
+    function passLocalStorageToWebView() {
+      const pendingDeeplink = localStorage.getItem("pending_deeplink");
+      if (pendingDeeplink) {
+        console.log("🌐 WebView detected, passing localStorage data");
+        
+        // Method 1: Pass via URL parameter (reload)
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('pending_deeplink')) {
+          url.searchParams.set('pending_deeplink', encodeURIComponent(pendingDeeplink));
+          window.location.href = url.toString();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Check if we're in a WebView and pass data
+    if (isFlutterWebView()) {
+      setTimeout(() => {
+        if (!passLocalStorageToWebView()) {
+          console.log("🌐 No pending deeplink found in localStorage for WebView");
+        }
+      }, 1000); // Small delay to ensure page is loaded
+    }
+
     let inviteCode = "123456";
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
