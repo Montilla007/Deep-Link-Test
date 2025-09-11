@@ -33,12 +33,24 @@
       font-size: 0.9rem;
       color: #666;
     }
+    .status {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .status.success {
+      color: green;
+    }
+    .status.fail {
+      color: red;
+    }
   </style>
 </head>
 <body>
   <h1>Join Space</h1>
   <div id="qrcode"></div>
   <div class="link" id="pagelink"></div>
+  <div id="storageStatus" class="status"></div>
   <div class="notice">
     If you don't have the app installed, you'll be redirected to download it.
   </div>
@@ -51,12 +63,18 @@
     const deeplink = `accessability://open/joinspace?code=${inviteCode}`;
     const apkDownload = "https://github.com/Montilla007/3Y2AAPWD/releases/latest/download/app-release.apk";
 
+    const storageStatusEl = document.getElementById("storageStatus");
+
     // --- STORE FOR LATER (for deferred deep linking) ---
     try {
       localStorage.setItem("pending_deeplink", deeplink);
       console.log("✅ Stored deep link in localStorage:", deeplink);
+      storageStatusEl.textContent = "✅ Invite link stored in your device";
+      storageStatusEl.classList.add("success");
     } catch (e) {
       console.warn("⚠️ Could not save to localStorage:", e);
+      storageStatusEl.textContent = "❌ Could not save invite link. Please check your browser settings.";
+      storageStatusEl.classList.add("fail");
     }
 
     // --- GENERATE QR FOR THIS PAGE ---
